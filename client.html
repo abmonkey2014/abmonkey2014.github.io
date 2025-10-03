@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-App Remote Hub</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="topBar">
+  <div class="logo">RemoteHub</div>
+  <button onclick="switchApp('desktop')">Remote Desktop</button>
+  <button onclick="switchApp('fileManager')">File Manager</button>
+  <button onclick="switchApp('notes')">Notes</button>
+</div>
+
+<div id="appsContainer">
+  <!-- Remote Desktop App -->
+  <div id="desktopApp" class="appWindow">
+    <div id="taskbar">
+      <div id="startBtn">⊞</div>
+      <div id="taskbarTitle">Remote Desktop</div>
+    </div>
+
+    <div class="icon" style="top:80px;left:40px;" onclick="openConnectWindow()">
+      <img src="https://cdn-icons-png.flaticon.com/512/876/876019.png">
+      <span>Connect</span>
+    </div>
+    <div class="icon" style="top:160px;left:40px;" onclick="openFileExplorer()">
+      <img src="https://cdn-icons-png.flaticon.com/512/3767/3767084.png">
+      <span>Files</span>
+    </div>
+
+    <div id="connectBox" class="window">
+      <h2>Connect to Host</h2>
+      <label>Host IP or Code:</label>
+      <input id="hostIp" type="text"><br>
+      <label>Password:</label>
+      <input id="password" type="password"><br>
+      <button onclick="connect()">Connect</button>
+      <button onclick="closeWindow('connectBox')">Close</button>
+    </div>
+
+    <div id="fileExplorer" class="window">
+      <h2>File Explorer</h2>
+      <ul id="fileList"></ul>
+      <button onclick="closeWindow('fileExplorer')">Close</button>
+    </div>
+
+    <video id="remoteVideo" autoplay playsinline></video>
+  </div>
+
+  <!-- File Manager App -->
+  <div id="fileManagerApp" class="appWindow">
+    <h2>File Manager</h2>
+    <p>List and download files from host here.</p>
+  </div>
+
+  <!-- Notes App -->
+  <div id="notesApp" class="appWindow">
+    <h2>Notes</h2>
+    <textarea style="width:100%; height:80%; border-radius:6px; padding:10px;"></textarea>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
