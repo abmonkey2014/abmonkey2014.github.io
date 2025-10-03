@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Remote Host Downloads</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Remote Host</h1>
+      <p>Download the host program for your computer and connect from anywhere.</p>
+    </header>
+
+    <section class="downloads">
+      <h2>Download Host</h2>
+      <div class="cards">
+        <a class="card" href="https://github.com/YOURNAME/remotedesktop/releases/latest/download/remote-host-windows.zip">
+          <img src="https://cdn-icons-png.flaticon.com/512/888/888879.png" alt="">
+          <span>Windows</span>
+        </a>
+        <a class="card" href="https://github.com/YOURNAME/remotedesktop/releases/latest/download/remote-host-linux.zip">
+          <img src="https://cdn-icons-png.flaticon.com/512/888/888847.png" alt="">
+          <span>Linux</span>
+        </a>
+        <a class="card" href="https://github.com/YOURNAME/remotedesktop/releases/latest/download/remote-host-macos.zip">
+          <img src="https://cdn-icons-png.flaticon.com/512/888/888840.png" alt="">
+          <span>macOS</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="share">
+      <h2>Share Your Host</h2>
+      <label>Host IP:</label><input id="shareIp" type="text">
+      <label>Password:</label><input id="sharePw" type="text">
+      <button onclick="generateLink()">Generate Link</button>
+      <p id="shareUrl"></p>
+    </section>
+
+    <footer>
+      <p>Remote Host &copy; 2025</p>
+    </footer>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
