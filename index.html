@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI GitHub Upload Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { font-family: monospace; background:#0d1117; color:#c9d1d9; padding:1em; }
+h2 { color:#58a6ff; text-align:center; }
+input,textarea,button { width:100%; margin:6px 0; padding:8px; border:none; border-radius:5px; font-size:14px; }
+textarea { background:#161b22; color:#fff; height:140px; }
+button { background:#238636; color:white; cursor:pointer; }
+button:hover { background:#2ea043; }
+.card { background:#161b22; padding:1em; border-radius:10px; margin-bottom:1em; }
+#log { white-space:pre-wrap; font-size:13px; background:#161b22; padding:10px; border-radius:5px; height:200px; overflow-y:auto; }
+small { color:#8b949e; }
+</style>
+</head>
+<body>
+
+<h2>🤖 AI GitHub Upload Hub</h2>
+
+<div class="card">
+  <h3>🔑 Token Settings</h3>
+  <input type="password" id="tokenInput" placeholder="Paste your GitHub Token here...">
+  <button onclick="saveToken()">💾 Save Token</button>
+  <small>Token is stored in your browser only. Safe for public GitHub Pages.</small>
+</div>
+
+<div class="card">
+  <h3>📂 Repo Settings</h3>
+  <input type="text" id="repo" placeholder="owner/repo (e.g., yourname/ai-upload-hub)">
+  <input type="text" id="defaultFolder" placeholder="Default folder (e.g., uploads)" value="uploads">
+</div>
+
+<div class="card">
+  <h3>🧠 AI Upload Log</h3>
+  <div id="log">Waiting for AI uploads...</div>
+</div>
+
+<script>
+// Load saved token
+document.getElementById("tokenInput").value = localStorage.getItem("ghToken") || "";
+
+// Save token locally
+function saveToken() {
+  const token = document.getElementById("tokenInput").value.trim();
+  if (!token) return alert("Paste a valid token first!");
+  localStorage.setItem("ghToken", token);
+  alert("✅ Token saved locally.");
+}
+
+// Log messages
+function log(msg) {
+  const logEl = document.getElementById("log");
+  logEl.innerText += "\n" + msg;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// Upload function
+async function uploadToGitHub(filename, content, folder) {
+  const token = localStorage.getItem("ghToken");
+  const repo = document.getElementById('repo').value.trim();
+  if (!token || !repo) {
+    log("⚠️ Token or repo missing.");
+    return;
+  }
+  const [owner, repoName] = repo.split("/");
+  folder = folder ? folder.replace(/^\/|\/$/g, '') : document.getElementById("defaultFolder").value || "uploads";
+  const path = `${folder}/${filename}`;
+  const url = `https://api.github.com/repos/${owner}/${repoName}/contents/${path}`;
+  const encoded = btoa(unescape
