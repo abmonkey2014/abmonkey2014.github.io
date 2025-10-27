@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI GitHub Upload Hub</title>
+<title>AI GitHub Upload API</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body { font-family: monospace; background:#0d1117; color:#c9d1d9; padding:1em; }
@@ -12,30 +12,55 @@ textarea { background:#161b22; color:#fff; height:140px; }
 button { background:#238636; color:white; cursor:pointer; }
 button:hover { background:#2ea043; }
 .card { background:#161b22; padding:1em; border-radius:10px; margin-bottom:1em; }
-#log { white-space:pre-wrap; font-size:13px; background:#161b22; padding:10px; border-radius:5px; height:200px; overflow-y:auto; }
+#log, #fileList { white-space:pre-wrap; font-size:13px; background:#161b22; padding:10px; border-radius:5px; height:200px; overflow-y:auto; }
 small { color:#8b949e; }
 </style>
 </head>
 <body>
 
-<h2>🤖 AI GitHub Upload Hub</h2>
+<h2>🤖 AI GitHub Upload API</h2>
 
 <div class="card">
-  <h3>🔑 Token Settings</h3>
+  <h3>🔑 GitHub Token</h3>
   <input type="password" id="tokenInput" placeholder="Paste your GitHub Token here...">
   <button onclick="saveToken()">💾 Save Token</button>
-  <small>Token is stored in your browser only. Safe for public GitHub Pages.</small>
+  <small>Token is stored locally in your browser only. Never uploaded.</small>
 </div>
 
 <div class="card">
-  <h3>📂 Repo Settings</h3>
+  <h3>📂 Repo & Folder</h3>
   <input type="text" id="repo" placeholder="owner/repo (e.g., yourname/ai-upload-hub)">
   <input type="text" id="defaultFolder" placeholder="Default folder (e.g., uploads)" value="uploads">
+  <button onclick="refreshFileList()">🔄 Refresh File List</button>
 </div>
 
 <div class="card">
   <h3>🧠 AI Upload Log</h3>
   <div id="log">Waiting for AI uploads...</div>
+</div>
+
+<div class="card">
+  <h3>📄 Uploaded Files</h3>
+  <div id="fileList">No files loaded yet.</div>
+</div>
+
+<div class="card">
+  <h3>🤖 AI Prompt Example</h3>
+  <div id="aiPrompt">
+<pre>
+You are an AI that uploads code to a GitHub repo via the user's browser page.
+The page exposes the following function:
+
+window.aiAPI({
+  filename: "my_script.py",
+  content: "print('Hello world')",
+  folder: "uploads" // optional
+});
+
+Always call this function for any generated code.
+Do not include tokens; the user has already set it in the browser.
+</pre>
+  </div>
 </div>
 
 <script>
@@ -69,4 +94,65 @@ async function uploadToGitHub(filename, content, folder) {
   folder = folder ? folder.replace(/^\/|\/$/g, '') : document.getElementById("defaultFolder").value || "uploads";
   const path = `${folder}/${filename}`;
   const url = `https://api.github.com/repos/${owner}/${repoName}/contents/${path}`;
-  const encoded = btoa(unescape
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+
+  try {
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `token ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: `AI upload: ${path}`,
+        content: encoded
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      log(`✅ Uploaded: ${path}`);
+      refreshFileList();
+    } else {
+      log(`❌ Error uploading ${path}: ${JSON.stringify(data)}`);
+    }
+  } catch (err) {
+    log(`❌ Upload failed: ${err}`);
+  }
+}
+
+// ---------------- AI API ----------------
+window.aiAPI = async function({filename, content, folder}) {
+  if (!filename || !content) return log("⚠️ filename and content required!");
+  folder = folder || document.getElementById("defaultFolder").value || "uploads";
+  log(`🔹 AI requested upload: ${folder}/${filename}`);
+  await uploadToGitHub(filename, content, folder);
+};
+
+// ---------------- File List ----------------
+async function refreshFileList() {
+  const repo = document.getElementById('repo').value.trim();
+  const folder = document.getElementById("defaultFolder").value.trim() || "uploads";
+  if (!repo) return log("⚠️ Set repo to list files.");
+  const [owner, repoName] = repo.split("/");
+  const url = `https://api.github.com/repos/${owner}/${repoName}/contents/${folder}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const listEl = document.getElementById("fileList");
+    if (res.ok && Array.isArray(data)) {
+      listEl.innerHTML = data.map(f => `📄 ${f.name} → <a href="${f.download_url}" target="_blank">${f.download_url}</a>`).join("\n");
+    } else {
+      listEl.innerHTML = "❌ Could not load files or folder empty.";
+      log(`❌ Error listing files: ${JSON.stringify(data)}`);
+    }
+  } catch (err) {
+    log(`❌ File list fetch failed: ${err}`);
+  }
+}
+
+log("✅ AI API ready! Call window.aiAPI({filename:'name.js', content:'code', folder:'optionalFolder'})");
+</script>
+
+</body>
+</html>
